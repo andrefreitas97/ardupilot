@@ -189,6 +189,14 @@ const AP_Param::GroupInfo AC_PrecLand::var_info[] = {
     // @RebootRequired: True
     AP_GROUPINFO_FRAME("ORIENT", 18, AC_PrecLand, _orient, AC_PRECLAND_ORIENT_DEFAULT, AP_PARAM_FRAME_ROVER),
 
+    // @Param: EST_TOUT
+    // @DisplayName: Precision Landing estimator timeout
+    // @Description: Max time without target measurements before the estimator declares the target lost. 0 uses the internal default.
+    // @Range: 0.2 5
+    // @Units: s
+    // @User: Advanced
+    AP_GROUPINFO("EST_TOUT", 19, AC_PrecLand, _est_timeout_sec, 2.0f),
+
     AP_GROUPEND
 };
 
@@ -399,7 +407,18 @@ bool AC_PrecLand::check_if_sensor_in_range(float rangefinder_alt_m, bool rangefi
 
 bool AC_PrecLand::target_acquired()
 {
-    if ((AP_HAL::millis()-_last_update_ms) > LANDING_TARGET_TIMEOUT_MS) {
+    // Base timeout (ms) from hard-coded default
+    float timeout_ms = LANDING_TARGET_TIMEOUT_MS;
+
+    // If user has set a positive EST_TOUT, use that instead (with safety limits)
+    const float est_tout_sec = _est_timeout_sec;   // param is in seconds
+    if (est_tout_sec > 0.0f) {
+        // clamp between 0.2s and 5.0s to avoid silly values
+        const float est_tout_clamped_sec = constrain_float(est_tout_sec, 0.2f, 5.0f);
+        timeout_ms = est_tout_clamped_sec * 1000.0f;
+    }
+
+    if ((AP_HAL::millis() - _last_update_ms) > timeout_ms) {
         if (_target_acquired) {
             // just lost the landing target, inform the user. This message will only be sent once every time target is lost
             GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "PrecLand: Target Lost");
