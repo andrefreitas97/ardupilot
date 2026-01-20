@@ -109,6 +109,24 @@ const AP_Param::GroupInfo AP_BattMonitor_Params::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("CRT_MAH", 15, AP_BattMonitor_Params, _critical_capacity, 0),
 
+    // @Param: LOW_PCT
+    // @DisplayName: Low battery remaining percentage
+    // @Description: Battery remaining percentage at which the low battery failsafe is triggered. Set to 0 to disable. Requires battery percentage to be available (current monitor + capacity, or a smart battery backend that provides remaining percentage).
+    // @Units: %
+    // @Range: 0 100
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("LOW_PCT", 23, AP_BattMonitor_Params, _low_pct, 0),
+
+    // @Param: CRT_PCT
+    // @DisplayName: Critical battery remaining percentage
+    // @Description: Battery remaining percentage at which the critical battery failsafe is triggered. Set to 0 to disable. Requires battery percentage to be available (current monitor + capacity, or a smart battery backend that provides remaining percentage).
+    // @Units: %
+    // @Range: 0 100
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("CRT_PCT", 24, AP_BattMonitor_Params, _critical_pct, 0),
+
     // @Param: FS_LOW_ACT
     // @DisplayName: Low battery failsafe action
     // @Description: What action the vehicle should perform if it hits a low battery failsafe

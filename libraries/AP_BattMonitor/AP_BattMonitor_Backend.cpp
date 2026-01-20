@@ -201,6 +201,9 @@ bool AP_BattMonitor_Backend::arming_checks(char * buffer, size_t buflen) const
     bool fs_voltage_inversion = is_positive(_params._critical_voltage) &&
                                 is_positive(_params._low_voltage) &&
                                 !(_params._low_voltage > _params._critical_voltage);
+    bool fs_pct_inversion = (_params._critical_pct > 0) &&
+                            (_params._low_pct > 0) &&
+                            !(_params._low_pct > _params._critical_pct);
 
     bool result = update_check(buflen, buffer, !_state.healthy, "unhealthy");
     result = result && update_check(buflen, buffer, below_arming_voltage, "below minimum arming voltage");
@@ -211,6 +214,7 @@ bool AP_BattMonitor_Backend::arming_checks(char * buffer, size_t buflen) const
     result = result && update_check(buflen, buffer, critical_capacity, "critical capacity failsafe");
     result = result && update_check(buflen, buffer, fs_capacity_inversion, "capacity failsafe critical >= low");
     result = result && update_check(buflen, buffer, fs_voltage_inversion, "voltage failsafe critical >= low");
+    result = result && update_check(buflen, buffer, fs_pct_inversion, "percentage failsafe critical >= low");
 
     return result;
 }
@@ -256,6 +260,19 @@ void AP_BattMonitor_Backend::check_failsafe_types(bool &low_voltage, bool &low_c
         low_capacity = true;
     } else {
         low_capacity = false;
+    }
+
+    // check capacity remaining percentage if available
+    if ((_params._critical_pct > 0) || (_params._low_pct > 0)) {
+        uint8_t pct = 0;
+        if (capacity_remaining_pct(pct)) {
+            if ((_params._critical_pct > 0) && (pct <= (uint8_t)_params._critical_pct)) {
+                critical_capacity = true; // treat percent as another "capacity" trigger
+            }
+            if ((_params._low_pct > 0) && (pct <= (uint8_t)_params._low_pct)) {
+                low_capacity = true;
+            }
+        }
     }
 }
 
