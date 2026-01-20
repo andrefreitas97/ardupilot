@@ -133,6 +133,14 @@ const AP_Param::GroupInfo AP_OSD::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("_W_BATVOLT", 14, AP_OSD, warn_batvolt, 10.0f),
 
+    // @Param: _W_BATPCT
+    // @DisplayName: BAT% warn level
+    // @Description: Set remaining battery percentage at which the BAT_VOLT item will flash when percentage is available (-1 disables, voltage warning used instead)
+    // @Range: -1 100
+    // @Units: %
+    // @User: Standard
+    AP_GROUPINFO("_W_BATPCT", 37, AP_OSD, warn_batpct, 30),
+
     // @Param: _UNITS
     // @DisplayName: Display Units
     // @Description: Sets the units to use in displaying items

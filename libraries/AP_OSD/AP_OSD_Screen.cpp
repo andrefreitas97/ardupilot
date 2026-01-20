@@ -1455,9 +1455,15 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t instance, VoltageType type, uint8_t x,
     AP_BattMonitor &battery = AP::battery();
     float v = battery.voltage(instance);
     float blinkvolt = osd->warn_batvolt;
-    uint8_t pct;
+
+    uint8_t pct = 0;
     bool show_remaining_pct = battery.capacity_remaining_pct(pct);
-    uint8_t p = (100 - pct) / 16.6;
+
+    uint8_t p = 0;
+    if (show_remaining_pct) {
+        p = (100 - pct) / 16.6f;
+    }
+
     switch (type) {
     case VoltageType::VOLTAGE: {
         break;
@@ -1489,20 +1495,41 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t instance, VoltageType type, uint8_t x,
        }
        break;
     }
-    }    
+    }
+    
+    bool blink = false;
+
+    if (show_remaining_pct && osd->warn_batpct.get() >= 0) {
+        blink = (pct <= (uint8_t)osd->warn_batpct.get());
+    } else {
+        blink = (v < blinkvolt);
+    }
+    
     if (!show_remaining_pct) {
         // Do not show battery percentage
         if (type == VoltageType::RESTING_CELL || type == VoltageType::AVG_CELL) {
-            backend->write(x,y, v < blinkvolt, "%1.2f%c", (double)v, SYMBOL(SYM_VOLT));
+            backend->write(x,y, blink, "%1.2f%c", (double)v, SYMBOL(SYM_VOLT));
         } else {
-            backend->write(x,y, v < blinkvolt, "%2.1f%c", (double)v, SYMBOL(SYM_VOLT));
+            backend->write(x,y, blink, "%2.1f%c", (double)v, SYMBOL(SYM_VOLT));
         }
         return;
     }
     if (type == VoltageType::RESTING_CELL || type == VoltageType::AVG_CELL) {
-        backend->write(x,y, v < blinkvolt, "%c%1.2f%c", SYMBOL(SYM_BATT_FULL) + p, (double)v, SYMBOL(SYM_VOLT));
+        backend->write(x, y, blink,
+                       "%c%3u%c %1.2f%c",
+                       SYMBOL(SYM_BATT_FULL) + p,
+                       (unsigned)pct,
+                       SYMBOL(SYM_PCNT),
+                       (double)v,
+                       SYMBOL(SYM_VOLT));
     } else {
-        backend->write(x,y, v < blinkvolt, "%c%2.1f%c", SYMBOL(SYM_BATT_FULL) + p, (double)v, SYMBOL(SYM_VOLT));
+        backend->write(x, y, blink,
+                       "%c%3u%c %2.1f%c",
+                       SYMBOL(SYM_BATT_FULL) + p,
+                       (unsigned)pct,
+                       SYMBOL(SYM_PCNT),
+                       (double)v,
+                       SYMBOL(SYM_VOLT));
     }
 }
 
