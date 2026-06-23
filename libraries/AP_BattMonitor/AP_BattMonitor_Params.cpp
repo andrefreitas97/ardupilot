@@ -127,6 +127,15 @@ const AP_Param::GroupInfo AP_BattMonitor_Params::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("CRT_PCT", 24, AP_BattMonitor_Params, _critical_pct, 0),
 
+    // @Param: ARM_PCT
+    // @DisplayName: Required arming remaining percentage
+    // @Description: Battery remaining percentage required to arm the aircraft. Set to 0 to allow arming at any remaining percentage. Requires battery percentage to be available (current monitor + capacity, or a smart battery backend that provides remaining percentage).
+    // @Units: %
+    // @Range: 0 100
+    // @Increment: 1
+    // @User: Advanced
+    AP_GROUPINFO("ARM_PCT", 25, AP_BattMonitor_Params, _arming_minimum_pct, 0),
+
     // @Param: FS_LOW_ACT
     // @DisplayName: Low battery failsafe action
     // @Description: What action the vehicle should perform if it hits a low battery failsafe
