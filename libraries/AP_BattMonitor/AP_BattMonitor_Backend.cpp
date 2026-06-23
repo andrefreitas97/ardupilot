@@ -195,6 +195,13 @@ bool AP_BattMonitor_Backend::arming_checks(char * buffer, size_t buflen) const
                                 (_state.voltage < _params._arming_minimum_voltage);
     bool below_arming_capacity = (_params._arming_minimum_capacity > 0) &&
                                  ((_params._pack_capacity - _state.consumed_mah) < _params._arming_minimum_capacity);
+    bool below_arming_pct = false;
+    if (_params._arming_minimum_pct > 0) {
+        uint8_t pct = 0;
+        if (capacity_remaining_pct(pct)) {
+            below_arming_pct = pct < (uint8_t)_params._arming_minimum_pct;
+        }
+    }
     bool fs_capacity_inversion = is_positive(_params._critical_capacity) &&
                                  is_positive(_params._low_capacity) &&
                                  !(_params._low_capacity > _params._critical_capacity);
@@ -208,6 +215,7 @@ bool AP_BattMonitor_Backend::arming_checks(char * buffer, size_t buflen) const
     bool result = update_check(buflen, buffer, !_state.healthy, "unhealthy");
     result = result && update_check(buflen, buffer, below_arming_voltage, "below minimum arming voltage");
     result = result && update_check(buflen, buffer, below_arming_capacity, "below minimum arming capacity");
+    result = result && update_check(buflen, buffer, below_arming_pct, "below minimum arming percentage");
     result = result && update_check(buflen, buffer, low_voltage,  "low voltage failsafe");
     result = result && update_check(buflen, buffer, low_capacity, "low capacity failsafe");
     result = result && update_check(buflen, buffer, critical_voltage, "critical voltage failsafe");

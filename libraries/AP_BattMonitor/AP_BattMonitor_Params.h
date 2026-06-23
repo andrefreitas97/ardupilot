@@ -42,6 +42,7 @@ public:
     AP_Int8  _critical_pct;
     AP_Int32 _arming_minimum_capacity;  /// capacity level required to arm
     AP_Float _arming_minimum_voltage;   /// voltage level required to arm
+    AP_Int8  _arming_minimum_pct;       /// battery remaining percentage required to arm
     AP_Int32 _options;                  /// Options
 #if AP_BATTERY_WATT_MAX_ENABLED
     AP_Int16 _watt_max;                 /// max battery power allowed. Reduce max throttle to reduce current to satisfy t    his limit
